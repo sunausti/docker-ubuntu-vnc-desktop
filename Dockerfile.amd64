@@ -106,3 +106,6 @@ RUN cp -r /opt/librealsense/* /usr/local/
 RUN cp -r /usr/src/librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/
 RUN cp -r /usr/src/librealsense/config/99-realsense-d4xx-mipi-dfu.rules /etc/udev/rules.d/
 RUN ldconfig
+
+RUN git clone https://github.com/PINTO0309/MobileNet-SSD-RealSense.git
+
