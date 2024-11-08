@@ -22,18 +22,14 @@ build: $(templates)
 # Test run the container
 # the local dir will be mounted under /src read-only
 run:
-	docker run --privileged --rm \
-		-p 6080:80 -p 6081:443 \
-		-v ${PWD}:/src:ro \
-		-e USER=doro -e PASSWORD=mypassword \
-		-e ALSADEV=hw:2,0 \
-		-e SSL_PORT=443 \
-		-e RELATIVE_URL_ROOT=approot \
-		-e OPENBOX_ARGS="--startup /usr/bin/galculator" \
-		-v ${PWD}/ssl:/etc/nginx/ssl \
-		--device /dev/snd \
-		--name ubuntu-desktop-lxde-test \
-		$(REPO):$(TAG)
+	docker rm -f realsense-lxde \
+	&& docker run -p 6080:80 -p 5900:5900 \
+	-v /dev:/dev \
+	--device-cgroup-rule "c 81:* rmw" \
+	--device-cgroup-rule "c 189:* rmw" \
+	--name realsense-lxde \
+	$(REPO):$(TAG)
+
 
 # Connect inside the running container for debugging
 shell:
@@ -52,11 +48,3 @@ extra-clean:
 	docker rmi $(REPO):$(TAG)
 	docker image prune -f
 
-# Run jinja2cli to parse Jinja template applying rules defined in the flavors definitions
-%: %.j2 flavors/$(FLAVOR).yml
-	docker run -v $(shell pwd):/data vikingco/jinja2cli \
-		-D flavor=$(FLAVOR) \
-		-D image=$(IMAGE) \
-		-D localbuild=$(LOCALBUILD) \
-		-D arch=$(ARCH) \
-		$< flavors/$(FLAVOR).yml > $@ || rm $@
